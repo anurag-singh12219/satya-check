@@ -1,5 +1,8 @@
 from newsapi import NewsApiClient
-from config import NEWS_API_KEY
+try:
+    from config import NEWS_API_KEY
+except ModuleNotFoundError:
+    from .config import NEWS_API_KEY
 
 newsapi = NewsApiClient(api_key=NEWS_API_KEY) if NEWS_API_KEY else None
 

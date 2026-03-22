@@ -7,7 +7,10 @@ from datetime import datetime
 from typing import Any
 from urllib.parse import urlparse
 
-from realtime_evidence import get_domain_weight
+try:
+    from realtime_evidence import get_domain_weight
+except ModuleNotFoundError:
+    from .realtime_evidence import get_domain_weight
 
 try:
     import numpy as np

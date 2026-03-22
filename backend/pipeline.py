@@ -10,18 +10,32 @@ try:
 except Exception:
     _langdetect_detect = None
 
-from config import (
-    ENABLE_SEMANTIC_RAG,
-    INPUT_COST_PER_1K,
-    RAG_TOP_K_NAIVE,
-    RAG_TOP_K_SMART,
-    SCALEDOWN_API_KEY,
-    SCALEDOWN_URL,
-    SEMANTIC_MODEL_NAME,
-)
-from facts_loader import serialize_facts
-from hybrid_retriever import HybridFactRetriever
-from realtime_evidence import fetch_live_evidence, get_domain_weight
+try:
+    from config import (
+        ENABLE_SEMANTIC_RAG,
+        INPUT_COST_PER_1K,
+        RAG_TOP_K_NAIVE,
+        RAG_TOP_K_SMART,
+        SCALEDOWN_API_KEY,
+        SCALEDOWN_URL,
+        SEMANTIC_MODEL_NAME,
+    )
+    from facts_loader import serialize_facts
+    from hybrid_retriever import HybridFactRetriever
+    from realtime_evidence import fetch_live_evidence, get_domain_weight
+except ModuleNotFoundError:
+    from .config import (
+        ENABLE_SEMANTIC_RAG,
+        INPUT_COST_PER_1K,
+        RAG_TOP_K_NAIVE,
+        RAG_TOP_K_SMART,
+        SCALEDOWN_API_KEY,
+        SCALEDOWN_URL,
+        SEMANTIC_MODEL_NAME,
+    )
+    from .facts_loader import serialize_facts
+    from .hybrid_retriever import HybridFactRetriever
+    from .realtime_evidence import fetch_live_evidence, get_domain_weight
 
 
 SCALEDOWN_CACHE_TTL_SECONDS = 180

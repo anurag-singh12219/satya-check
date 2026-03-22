@@ -1,7 +1,10 @@
 import json
 from typing import Any
 
-from config import DATA_DIR
+try:
+    from config import DATA_DIR
+except ModuleNotFoundError:
+    from .config import DATA_DIR
 
 
 def _normalize_fact(item: Any) -> str:

@@ -2,10 +2,16 @@ from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from config import APP_API_KEY, SOCIAL_INSTAGRAM_HANDLES, SOCIAL_X_HANDLES
-from facts_loader import load_facts_records
-from pipeline import fact_check_pipeline, run_batch
-from realtime_evidence import fetch_social_feed
+try:
+    from config import APP_API_KEY, SOCIAL_INSTAGRAM_HANDLES, SOCIAL_X_HANDLES
+    from facts_loader import load_facts_records
+    from pipeline import fact_check_pipeline, run_batch
+    from realtime_evidence import fetch_social_feed
+except ModuleNotFoundError:
+    from .config import APP_API_KEY, SOCIAL_INSTAGRAM_HANDLES, SOCIAL_X_HANDLES
+    from .facts_loader import load_facts_records
+    from .pipeline import fact_check_pipeline, run_batch
+    from .realtime_evidence import fetch_social_feed
 
 app = FastAPI(title="SatyaCheck API", version="2.0.0")
 
