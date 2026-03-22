@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: satya-check-api
+    env: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: SCALEDOWN_API_KEY
+        sync: false
+      - key: NEWS_API_KEY
+        sync: false
+      - key: APP_API_KEY
+        sync: false
+      - key: ENABLE_SEMANTIC_RAG
+        value: "0"
+      - key: RAG_TOP_K_SMART
+        value: "60"
+      - key: RAG_TOP_K_NAIVE
+        value: "120"
+      - key: INPUT_COST_PER_1K
+        value: "0.0025"
