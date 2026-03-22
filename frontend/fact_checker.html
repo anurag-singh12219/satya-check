@@ -930,7 +930,10 @@ footer {
 
 <script>
 // ─── CONFIG ───────────────────────────────────────────────
-const BACKEND_BASE_URL = "https://satya-check-api.onrender.com";
+const BACKEND_BASE_URL = (
+  window.SATYACHECK_BACKEND_URL ||
+  "https://satya-check-api.onrender.com"
+).replace(/\/$/, "");
 const BACKEND_API_KEY = "";
 const BATCH_POST_COUNT = 10;
 
@@ -1374,7 +1377,7 @@ async function runBatch() {
     document.getElementById('feedStatus').style.background = 'rgba(239,68,68,0.1)';
     document.getElementById('feedStatus').style.color = 'var(--red)';
     console.error(error);
-    alert('Batch run failed. Ensure backend is running on http://localhost:8000');
+    alert(`Batch run failed. Ensure backend is reachable at ${BACKEND_BASE_URL}`);
   }
 }
 
