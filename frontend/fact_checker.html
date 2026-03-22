@@ -932,10 +932,50 @@ footer {
 // ─── CONFIG ───────────────────────────────────────────────
 const BACKEND_BASE_URL = (
   window.SATYACHECK_BACKEND_URL ||
+  localStorage.getItem('satya_backend_url') ||
   "https://satya-check-api.onrender.com"
 ).replace(/\/$/, "");
 const BACKEND_API_KEY = "";
 const BATCH_POST_COUNT = 10;
+
+function setBackendBaseUrl(url) {
+  const clean = (url || '').trim().replace(/\/$/, '');
+  if (!clean) return;
+  localStorage.setItem('satya_backend_url', clean);
+}
+
+async function checkBackendHealth(baseUrl) {
+  const resp = await fetch(baseUrl + '/health', {
+    method: 'GET',
+    headers: BACKEND_API_KEY ? { 'x-api-key': BACKEND_API_KEY } : {}
+  });
+  if (!resp.ok) {
+    throw new Error(`Health check failed (${resp.status})`);
+  }
+}
+
+async function ensureBackendUrl() {
+  try {
+    await checkBackendHealth(BACKEND_BASE_URL);
+    return BACKEND_BASE_URL;
+  } catch (_) {
+    const entered = window.prompt(
+      `Backend URL is not reachable: ${BACKEND_BASE_URL}\nEnter your Render backend URL (example: https://your-service.onrender.com)`
+    );
+    if (!entered) return BACKEND_BASE_URL;
+
+    const candidate = entered.trim().replace(/\/$/, '');
+    try {
+      await checkBackendHealth(candidate);
+      setBackendBaseUrl(candidate);
+      alert(`Backend URL updated to ${candidate}`);
+      return candidate;
+    } catch (e) {
+      alert(`Entered backend URL is still not reachable: ${candidate}`);
+      return BACKEND_BASE_URL;
+    }
+  }
+}
 
 function getApiHeaders() {
   const headers = { "Content-Type": "application/json" };
@@ -1092,6 +1132,7 @@ function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 // ─── MAIN CHECK FUNCTION ─────────────────────────────────
 async function runCheck() {
+  const activeBackendUrl = await ensureBackendUrl();
   const post = document.getElementById('postInput').value.trim();
   if (!post) { alert('Please enter a social media post to fact-check.'); return; }
 
@@ -1121,14 +1162,15 @@ async function runCheck() {
     document.getElementById('loaderText').textContent = 'Scoring evidence and finalizing verdict...';
 
     const endpoint = currentMode === 'smart' ? '/fact-check/smart' : '/fact-check/naive';
-    const response = await fetch(BACKEND_BASE_URL + endpoint, {
+    const response = await fetch(activeBackendUrl + endpoint, {
       method: "POST",
       headers: getApiHeaders(),
       body: JSON.stringify({ text: post })
     });
 
     if (!response.ok) {
-      throw new Error(`Backend error ${response.status}`);
+      const errBody = await response.text();
+      throw new Error(`Backend error ${response.status}: ${errBody.slice(0, 180)}`);
     }
 
     const data = await response.json();
@@ -1287,15 +1329,16 @@ function initFeed() {
 }
 
 async function refreshFeedFromBackend() {
+  const activeBackendUrl = await ensureBackendUrl();
   try {
-    const socialResp = await fetch(BACKEND_BASE_URL + '/social-feed', { headers: getApiHeaders() });
+    const socialResp = await fetch(activeBackendUrl + '/social-feed', { headers: getApiHeaders() });
     const socialData = socialResp.ok ? await socialResp.json() : { posts: [] };
     const socialPosts = (socialData.posts || []).map(p => ({
       text: p.title || p.snippet || '',
       lang: (p.platform || 'social').toUpperCase()
     })).filter(p => p.text);
 
-    const newsResp = await fetch(BACKEND_BASE_URL + '/live-news', { headers: getApiHeaders() });
+    const newsResp = await fetch(activeBackendUrl + '/live-news', { headers: getApiHeaders() });
     const newsData = newsResp.ok ? await newsResp.json() : { posts: [] };
     const newsPosts = (newsData.posts || []).map(t => ({ text: t, lang: 'NEWS' }));
 
@@ -1329,6 +1372,7 @@ async function refreshQueueOnly() {
 }
 
 async function runBatch() {
+  const activeBackendUrl = await ensureBackendUrl();
   await refreshFeedFromBackend();
   initFeed();
   document.getElementById('feedStatus').textContent = 'RUNNING';
@@ -1342,14 +1386,15 @@ async function runBatch() {
   };
 
   try {
-    const response = await fetch(BACKEND_BASE_URL + '/benchmark', {
+    const response = await fetch(activeBackendUrl + '/benchmark', {
       method: 'POST',
       headers: getApiHeaders(),
       body: JSON.stringify(payload)
     });
 
     if (!response.ok) {
-      throw new Error(`Benchmark failed with status ${response.status}`);
+      const errBody = await response.text();
+      throw new Error(`Benchmark failed with status ${response.status}: ${errBody.slice(0, 180)}`);
     }
 
     const data = await response.json();
@@ -1377,7 +1422,7 @@ async function runBatch() {
     document.getElementById('feedStatus').style.background = 'rgba(239,68,68,0.1)';
     document.getElementById('feedStatus').style.color = 'var(--red)';
     console.error(error);
-    alert(`Batch run failed. Ensure backend is reachable at ${BACKEND_BASE_URL}`);
+    alert(`Batch run failed. Ensure backend is reachable at ${activeBackendUrl}`);
   }
 }
 
