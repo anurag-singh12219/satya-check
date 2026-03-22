@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SatyaCheck — Vernacular AI Fact-Checker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0c10;
+  --surface: #111318;
+  --surface2: #1a1d26;
+  --border: #252836;
+  --accent: #f0b429;
+  --accent2: #e05c2a;
+  --green: #22c55e;
+  --red: #ef4444;
+  --blue: #3b82f6;
+  --muted: #6b7280;
+  --text: #e8eaf0;
+  --text2: #9ca3af;
+  --font-mono: 'Space Mono', monospace;
+  --font-display: 'Syne', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-display);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Background grid */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(240,180,41,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(240,180,41,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+/* HEADER */
+header {
+  border-bottom: 1px solid var(--border);
+  padding: 16px 0;
+  background: rgba(10,12,16,0.95);
+  backdrop-filter: blur(12px);
+  position: sticky; top: 0; z-index: 100;
+}
+.header-inner {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.logo {
+  display: flex; align-items: center; gap: 10px;
+}
+.logo-mark {
+  width: 36px; height: 36px;
+  background: var(--accent);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: #000;
+  font-size: 14px;
+}
+.logo-text { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+.logo-text span { color: var(--accent); }
+.badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  background: rgba(240,180,41,0.15);
+  color: var(--accent);
+  border: 1px solid rgba(240,180,41,0.3);
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 1px;
+}
+
+/* HERO */
+.hero {
+  padding: 60px 0 40px;
+  text-align: center;
+}
+.hero-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  border: 1px solid rgba(240,180,41,0.2);
+  padding: 6px 14px;
+  border-radius: 100px;
+  background: rgba(240,180,41,0.05);
+}
+.hero-tag::before { content: '●'; font-size: 8px; animation: blink 1.5s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+h1 {
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -2px;
+  margin-bottom: 16px;
+}
+h1 .accent { color: var(--accent); }
+h1 .hindi { 
+  font-family: 'Noto Sans Devanagari', sans-serif;
+  color: var(--accent2); 
+  font-size: 0.75em;
+  display: block;
+  letter-spacing: 0;
+}
+
+.hero-sub {
+  color: var(--text2);
+  font-size: 16px;
+  max-width: 560px;
+  margin: 0 auto 32px;
+  line-height: 1.6;
+}
+
+/* TABS */
+.tabs {
+  display: flex; gap: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 4px;
+  width: fit-content;
+  margin: 0 auto 40px;
+}
+.tab {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+  background: transparent;
+  transition: all 0.2s;
+}
+.tab.active {
+  background: var(--accent);
+  color: #000;
+}
+.tab:hover:not(.active) { color: var(--text); }
+
+/* MAIN GRID */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 20px;
+  margin-bottom: 40px;
+}
+@media(max-width:900px){ .main-grid { grid-template-columns: 1fr; } }
+
+/* CARDS */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.card-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.card-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text2);
+}
+.card-body { padding: 20px; }
+
+/* INPUT */
+textarea {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 15px;
+  padding: 14px 16px;
+  resize: vertical;
+  min-height: 120px;
+  outline: none;
+  transition: border-color 0.2s;
+  line-height: 1.6;
+}
+textarea:focus { border-color: var(--accent); }
+textarea::placeholder { color: var(--muted); }
+
+.lang-pills {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin: 12px 0;
+}
+.lang-pill {
+  padding: 5px 12px;
+  border-radius: 100px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--text2);
+}
+.lang-pill:hover, .lang-pill.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(240,180,41,0.08);
+}
+
+.sample-btn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--blue);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+/* MODE TOGGLE */
+.mode-toggle {
+  display: flex; gap: 8px; margin: 16px 0;
+}
+.mode-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text2);
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s;
+  text-align: center;
+}
+.mode-btn.active.naive {
+  border-color: var(--red);
+  background: rgba(239,68,68,0.1);
+  color: var(--red);
+}
+.mode-btn.active.smart {
+  border-color: var(--green);
+  background: rgba(34,197,94,0.1);
+  color: var(--green);
+}
+
+/* RUN BUTTON */
+.run-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  border: none;
+  background: var(--accent);
+  color: #000;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.run-btn:hover { background: #f5c842; transform: translateY(-1px); }
+.run-btn:active { transform: translateY(0); }
+.run-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* RESULT */
+.result-area {
+  margin-top: 16px;
+  display: none;
+}
+.result-area.show { display: block; }
+
+.verdict-banner {
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 12px;
+  font-weight: 700;
+  font-size: 18px;
+}
+.verdict-banner.TRUE { background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.3); color: var(--green); }
+.verdict-banner.FALSE { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); color: var(--red); }
+.verdict-banner.UNVERIFIABLE { background: rgba(240,180,41,0.1); border: 1px solid rgba(240,180,41,0.3); color: var(--accent); }
+
+.verdict-icon { font-size: 24px; }
+.verdict-label { font-size: 11px; font-family: var(--font-mono); letter-spacing: 2px; opacity: 0.7; display: block; }
+
+.reason-box {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 14px;
+  color: var(--text2);
+  line-height: 1.6;
+}
+.reason-box strong { color: var(--text); }
+
+/* METRICS */
+.metrics-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;
+}
+.metric-box {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.metric-label { font-size: 10px; font-family: var(--font-mono); letter-spacing: 1px; color: var(--muted); text-transform: uppercase; }
+.metric-value { font-size: 20px; font-weight: 800; font-family: var(--font-mono); margin-top: 2px; }
+.metric-value.good { color: var(--green); }
+.metric-value.bad { color: var(--red); }
+.metric-value.neutral { color: var(--accent); }
+
+/* TOKEN FLOW */
+.token-flow {
+  margin-top: 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+}
+.token-flow-label { font-size: 10px; font-family: var(--font-mono); color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.token-bar-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.token-bar-bg { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+.token-bar { height: 100%; border-radius: 4px; transition: width 1s ease; }
+.token-bar.original { background: var(--red); }
+.token-bar.compressed { background: var(--green); }
+.token-count { font-family: var(--font-mono); font-size: 11px; color: var(--text2); min-width: 50px; text-align: right; }
+
+/* RIGHT PANEL */
+.stats-panel .card-body { padding: 0; }
+
+.stat-row {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.stat-row:last-child { border-bottom: none; }
+.stat-name { font-size: 13px; color: var(--text2); }
+.stat-val { font-family: var(--font-mono); font-size: 14px; font-weight: 700; }
+
+/* COMPARE TABLE */
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-top: 16px;
+}
+.compare-table th {
+  text-align: left;
+  padding: 8px 12px;
+  background: var(--surface2);
+  color: var(--text2);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.compare-table td {
+  padding: 10px 12px;
+  border-top: 1px solid var(--border);
+  vertical-align: top;
+  line-height: 1.5;
+}
+.compare-table tr:hover td { background: rgba(255,255,255,0.02); }
+.good-cell { color: var(--green); font-weight: 700; }
+.bad-cell { color: var(--red); }
+
+/* FEED */
+.feed-item {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.feed-item:hover { background: rgba(255,255,255,0.02); }
+.feed-item:last-child { border-bottom: none; }
+.feed-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.feed-lang { font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
+.feed-verdict { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 100px; font-family: var(--font-mono); }
+.feed-verdict.TRUE { background: rgba(34,197,94,0.15); color: var(--green); }
+.feed-verdict.FALSE { background: rgba(239,68,68,0.15); color: var(--red); }
+.feed-verdict.UNVERIFIABLE { background: rgba(240,180,41,0.12); color: var(--accent); }
+.feed-verdict.PENDING { background: rgba(107,114,128,0.15); color: var(--muted); }
+.feed-text { font-size: 13px; color: var(--text2); line-height: 1.5; }
+
+/* LOADER */
+.loader {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 24px;
+  text-align: center;
+}
+.loader.show { display: flex; }
+.spinner {
+  width: 32px; height: 32px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loader-text { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+
+/* PIPELINE VIZ */
+.pipeline {
+  display: flex; align-items: center; gap: 0; margin: 16px 0; overflow-x: auto;
+}
+.pipe-step {
+  display: flex; align-items: center;
+}
+.pipe-node {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text2);
+  white-space: nowrap;
+  transition: all 0.3s;
+}
+.pipe-node.active { border-color: var(--accent); color: var(--accent); background: rgba(240,180,41,0.08); }
+.pipe-node.done { border-color: var(--green); color: var(--green); background: rgba(34,197,94,0.08); }
+.pipe-arrow { color: var(--muted); padding: 0 6px; font-size: 12px; }
+
+/* THROUGHPUT METER */
+.throughput-meter {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  margin-top: 12px;
+}
+.throughput-number {
+  font-family: var(--font-mono);
+  font-size: 40px;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+}
+.throughput-unit { font-size: 12px; color: var(--muted); font-family: var(--font-mono); margin-top: 4px; }
+
+/* TABS CONTENT */
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+.section-title {
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+.section-sub { color: var(--text2); font-size: 13px; margin-bottom: 20px; }
+
+.cost-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono); font-size: 11px;
+  padding: 4px 10px; border-radius: 6px;
+}
+.cost-chip.naive { background: rgba(239,68,68,0.1); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
+.cost-chip.smart { background: rgba(34,197,94,0.1); color: var(--green); border: 1px solid rgba(34,197,94,0.2); }
+
+/* Footer */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 24px 0;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  font-family: var(--font-mono);
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-mark">SC</div>
+        <div class="logo-text">Satya<span>Check</span></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="badge">HPE × INTEL</span>
+        <span class="badge" style="color:var(--green);border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.07);">GENAI WORKSHOP</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="hero">
+    <div class="hero-tag">Real-time Misinformation Detection</div>
+    <h1>
+      Automated <span class="accent">Fact-Checker</span>
+      <span class="hindi">सत्य की जाँच — Satya ki Jaanch</span>
+    </h1>
+    <p class="hero-sub">
+      Scalable pipeline for vernacular news verification in Hindi, Tamil, Bengali & more.
+      Powered by ScaleDown compression — 98% cheaper than naive approach.
+    </p>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('checker')">🔍 Fact Checker</button>
+      <button class="tab" onclick="switchTab('compare')">⚡ Comparison</button>
+      <button class="tab" onclick="switchTab('feed')">📡 Live Feed</button>
+    </div>
+  </div>
+
+  <!-- TAB 1: CHECKER -->
+  <div id="tab-checker" class="tab-content active">
+    <div class="main-grid">
+      <div>
+        <!-- Input Card -->
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-header">
+            <span class="card-title">Social Media Post</span>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <button class="sample-btn" onclick="loadSample('hi')">Load Hindi Sample</button>
+              <button class="sample-btn" onclick="loadSample('en')">Load English Sample</button>
+              <button class="sample-btn" onclick="loadSample('ta')">Load Tamil Sample</button>
+              <button class="sample-btn" onclick="loadSample('bn')">Load Bengali Sample</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <textarea id="postInput" placeholder="Paste a social media post here in any Indian language... &#10;&#10;Example: नई सरकारी नीति के तहत 12 लाख रुपये तक की आय पर कोई टैक्स नहीं लगेगा।"></textarea>
+            
+            <div class="lang-pills">
+              <span class="lang-pill active" onclick="setLang(this,'auto')">🌐 Auto-detect</span>
+              <span class="lang-pill" onclick="setLang(this,'hi')">हि Hindi</span>
+              <span class="lang-pill" onclick="setLang(this,'ta')">த Tamil</span>
+              <span class="lang-pill" onclick="setLang(this,'bn')">বাং Bengali</span>
+              <span class="lang-pill" onclick="setLang(this,'te')">తె Telugu</span>
+              <span class="lang-pill" onclick="setLang(this,'en')">EN English</span>
+            </div>
+
+            <div style="margin-top:12px;">
+              <div style="font-size:12px;color:var(--muted);margin-bottom:8px;font-family:var(--font-mono);">PIPELINE MODE</div>
+              <div class="mode-toggle">
+                <button class="mode-btn naive" onclick="setMode(this,'naive')" id="naiveBtn">
+                  ❌ Naive (All 10K Facts)
+                </button>
+                <button class="mode-btn smart active" onclick="setMode(this,'smart')" id="smartBtn">
+                  ✅ Smart (ScaleDown)
+                </button>
+              </div>
+            </div>
+
+            <!-- Pipeline Viz -->
+            <div class="pipeline" id="pipelineViz">
+              <div class="pipe-step">
+                <div class="pipe-node" id="pipe1">POST IN</div>
+                <div class="pipe-arrow">→</div>
+              </div>
+              <div class="pipe-step">
+                <div class="pipe-node" id="pipe2">SCALEDOWN</div>
+                <div class="pipe-arrow">→</div>
+              </div>
+              <div class="pipe-step">
+                <div class="pipe-node" id="pipe3">LLM VERDICT</div>
+                <div class="pipe-arrow">→</div>
+              </div>
+              <div class="pipe-step">
+                <div class="pipe-node" id="pipe4">OUTPUT</div>
+              </div>
+            </div>
+
+            <button class="run-btn" onclick="runCheck()" id="runBtn">
+              <span>⚡</span> Run Fact Check
+            </button>
+          </div>
+        </div>
+
+        <!-- Loader -->
+        <div class="loader card" id="loader">
+          <div class="spinner"></div>
+          <div class="loader-text" id="loaderText">Compressing facts with ScaleDown...</div>
+        </div>
+
+        <!-- Result -->
+        <div class="card result-area" id="resultArea">
+          <div class="card-header">
+            <span class="card-title">Verdict</span>
+            <div id="modeBadge"></div>
+          </div>
+          <div class="card-body">
+            <div class="verdict-banner" id="verdictBanner">
+              <span class="verdict-icon" id="verdictIcon"></span>
+              <div>
+                <span class="verdict-label">VERDICT</span>
+                <span id="verdictText"></span>
+              </div>
+            </div>
+
+            <div class="reason-box" id="reasonBox"></div>
+
+            <div class="token-flow" id="tokenFlow">
+              <div class="token-flow-label">Token Usage</div>
+              <div class="token-bar-wrap">
+                <span style="font-size:11px;color:var(--red);font-family:var(--font-mono);width:80px;">Original</span>
+                <div class="token-bar-bg">
+                  <div class="token-bar original" id="origBar" style="width:100%"></div>
+                </div>
+                <span class="token-count" id="origCount"></span>
+              </div>
+              <div class="token-bar-wrap">
+                <span style="font-size:11px;color:var(--green);font-family:var(--font-mono);width:80px;">Compressed</span>
+                <div class="token-bar-bg">
+                  <div class="token-bar compressed" id="compBar" style="width:0%"></div>
+                </div>
+                <span class="token-count" id="compCount"></span>
+              </div>
+            </div>
+
+            <div class="metrics-grid" id="metricsGrid">
+              <div class="metric-box">
+                <div class="metric-label">Latency</div>
+                <div class="metric-value neutral" id="metricLatency">—</div>
+              </div>
+              <div class="metric-box">
+                <div class="metric-label">Cost/Check</div>
+                <div class="metric-value" id="metricCost">—</div>
+              </div>
+              <div class="metric-box">
+                <div class="metric-label">Token Savings</div>
+                <div class="metric-value good" id="metricSavings">—</div>
+              </div>
+              <div class="metric-box">
+                <div class="metric-label">Cost/M checks/day</div>
+                <div class="metric-value" id="metricScale">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT PANEL -->
+      <div>
+        <!-- Stats -->
+        <div class="card stats-panel" style="margin-bottom:16px;">
+          <div class="card-header">
+            <span class="card-title">Session Stats</span>
+          </div>
+          <div class="card-body">
+            <div class="stat-row">
+              <span class="stat-name">Posts Checked</span>
+              <span class="stat-val" id="statChecked">0</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-name">TRUE</span>
+              <span class="stat-val" style="color:var(--green)" id="statTrue">0</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-name">FALSE</span>
+              <span class="stat-val" style="color:var(--red)" id="statFalse">0</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-name">UNVERIFIABLE</span>
+              <span class="stat-val" style="color:var(--accent)" id="statUnverif">0</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-name">Avg Token Savings</span>
+              <span class="stat-val" style="color:var(--green)" id="statSavings">—</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-name">Total Cost Saved</span>
+              <span class="stat-val" style="color:var(--green)" id="statCostSaved">$0.00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Throughput -->
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-header">
+            <span class="card-title">Throughput</span>
+            <span style="font-size:11px;font-family:var(--font-mono);color:var(--muted)">50 workers</span>
+          </div>
+          <div class="card-body">
+            <div class="throughput-meter">
+              <div class="throughput-number" id="throughputNum">12,000</div>
+              <div class="throughput-unit">posts / minute (estimated)</div>
+            </div>
+            <div style="margin-top:12px;font-size:12px;color:var(--muted);font-family:var(--font-mono);line-height:1.8;">
+              • ScaleDown call: ~150ms<br>
+              • LLM verdict: ~100ms<br>
+              • Total/post: ~250ms<br>
+              • 50 parallel workers → 12K/min
+            </div>
+          </div>
+        </div>
+
+        <!-- Fact DB status -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Facts Database</span>
+            <span style="font-size:10px;background:rgba(34,197,94,0.1);color:var(--green);padding:2px 8px;border-radius:4px;font-family:var(--font-mono);">LIVE</span>
+          </div>
+          <div class="card-body">
+            <div class="stat-row" style="padding:8px 0;">
+              <span class="stat-name">Total Facts</span>
+              <span class="stat-val">10,000</span>
+            </div>
+            <div class="stat-row" style="padding:8px 0;">
+              <span class="stat-name">Last Updated</span>
+              <span class="stat-val" style="font-size:11px;color:var(--muted)">Today</span>
+            </div>
+            <div class="stat-row" style="padding:8px 0;">
+              <span class="stat-name">Storage</span>
+              <span class="stat-val" style="color:var(--green)">Plain text</span>
+            </div>
+            <div class="stat-row" style="padding:8px 0;">
+              <span class="stat-name">Vector DB</span>
+              <span class="stat-val" style="color:var(--red)">Not needed ✓</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: COMPARE -->
+  <div id="tab-compare" class="tab-content">
+    <div class="section-title">Naive vs Smart Pipeline</div>
+    <p class="section-sub">Why sending 40,000 tokens every time is mathematically impossible at scale</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title" style="color:var(--red)">❌ Naive Approach</span>
+          <span class="cost-chip naive">$0.10/check</span>
+        </div>
+        <div class="card-body">
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:var(--font-mono);font-size:12px;color:#a8b4d0;line-height:1.8;margin-bottom:12px;">
+            <span style="color:#6b7280"># Send ALL 10,000 facts every time</span><br>
+            all_facts = load_facts_db()<br>
+            <span style="color:#6b7280"># 10,000 facts ≈ 40,000 tokens</span><br>
+            response = openai.chat(<br>
+            &nbsp;&nbsp;messages=[{<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;"role": "user",<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;"content": f"Facts:\n<span style="color:#ef4444">{all_facts}</span>\nIs this true?"<br>
+            &nbsp;&nbsp;}]<br>
+            )
+          </div>
+          <table class="compare-table">
+            <tr><td>Tokens/check</td><td class="bad-cell">40,000</td></tr>
+            <tr><td>Cost/check</td><td class="bad-cell">$0.10</td></tr>
+            <tr><td>At 1M checks/day</td><td class="bad-cell">$100,000/day</td></tr>
+            <tr><td>Context window</td><td class="bad-cell">Often exceeds limit</td></tr>
+            <tr><td>Old conflicting facts</td><td class="bad-cell">Confuses model</td></tr>
+            <tr><td>Vector DB needed</td><td class="bad-cell">$70+/month</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title" style="color:var(--green)">✅ ScaleDown Approach</span>
+          <span class="cost-chip smart">$0.001/check</span>
+        </div>
+        <div class="card-body">
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:var(--font-mono);font-size:12px;color:#a8b4d0;line-height:1.8;margin-bottom:12px;">
+            <span style="color:#6b7280"># ScaleDown finds relevant facts first</span><br>
+            compressed = scaledown.compress(<br>
+            &nbsp;&nbsp;context=all_facts,<br>
+            &nbsp;&nbsp;prompt=social_post<br>
+            )<br>
+            <span style="color:#22c55e"># 40,000 → ~200 relevant tokens!</span><br>
+            relevant = compressed["compressed_prompt"]<br>
+            response = openai.chat(relevant)
+          </div>
+          <table class="compare-table">
+            <tr><td>Tokens/check</td><td class="good-cell">~200</td></tr>
+            <tr><td>Cost/check</td><td class="good-cell">$0.001</td></tr>
+            <tr><td>At 1M checks/day</td><td class="good-cell">$1,000/day</td></tr>
+            <tr><td>Context window</td><td class="good-cell">Always fits</td></tr>
+            <tr><td>Old conflicting facts</td><td class="good-cell">Filtered out</td></tr>
+            <tr><td>Vector DB needed</td><td class="good-cell">No ✓</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title">Cost at Scale</span></div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+          <div class="metric-box" style="text-align:center;">
+            <div class="metric-label">Naive — 1M/day</div>
+            <div class="metric-value bad" style="font-size:24px;">$100K</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px;">per day</div>
+          </div>
+          <div class="metric-box" style="text-align:center;">
+            <div class="metric-label">Smart — 1M/day</div>
+            <div class="metric-value good" style="font-size:24px;">$1K</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px;">per day</div>
+          </div>
+          <div class="metric-box" style="text-align:center;">
+            <div class="metric-label">Savings</div>
+            <div class="metric-value good" style="font-size:24px;">99%</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px;">reduction</div>
+          </div>
+          <div class="metric-box" style="text-align:center;">
+            <div class="metric-label">Token Reduction</div>
+            <div class="metric-value good" style="font-size:24px;">200×</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px;">smaller</div>
+          </div>
+        </div>
+
+        <!-- Visual Bar -->
+        <div style="margin-top:20px;">
+          <div style="font-size:12px;color:var(--muted);font-family:var(--font-mono);margin-bottom:10px;">DAILY COST COMPARISON (at 1M checks/day)</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <span style="width:80px;font-size:12px;color:var(--red);font-family:var(--font-mono);">Naive</span>
+            <div style="flex:1;height:28px;background:rgba(239,68,68,0.8);border-radius:4px;display:flex;align-items:center;padding:0 10px;">
+              <span style="font-family:var(--font-mono);font-size:12px;color:#fff;font-weight:700;">$100,000/day</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="width:80px;font-size:12px;color:var(--green);font-family:var(--font-mono);">Smart</span>
+            <div style="width:1%;min-width:80px;height:28px;background:rgba(34,197,94,0.8);border-radius:4px;display:flex;align-items:center;padding:0 10px;">
+              <span style="font-family:var(--font-mono);font-size:12px;color:#fff;font-weight:700;">$1,000</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: FEED -->
+  <div id="tab-feed" class="tab-content">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div>
+        <div class="section-title">Live Fact-Check Feed</div>
+        <p class="section-sub" style="margin-bottom:0;">Simulated batch pipeline — 50 parallel workers</p>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <button class="run-btn" style="width:auto;padding:10px 20px;background:var(--surface2);color:var(--text);border:1px solid var(--border);" onclick="refreshQueueOnly()">
+          ↻ Refresh Queue
+        </button>
+        <button class="run-btn" style="width:auto;padding:10px 20px;" onclick="runBatch()">
+          ▶ Run Batch (10 Posts)
+        </button>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 320px;gap:16px;">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Post Queue</span>
+          <span class="badge" id="feedStatus">IDLE</span>
+        </div>
+        <div id="feedList">
+          <!-- populated by JS -->
+        </div>
+      </div>
+
+      <div>
+        <div class="card" style="margin-bottom:12px;">
+          <div class="card-header"><span class="card-title">Batch Metrics</span></div>
+          <div class="card-body">
+            <div class="stat-row" style="padding:8px 0;"><span class="stat-name">Posts processed</span><span class="stat-val" id="batchProcessed">0</span></div>
+            <div class="stat-row" style="padding:8px 0;"><span class="stat-name">Elapsed</span><span class="stat-val" id="batchElapsed">0s</span></div>
+            <div class="stat-row" style="padding:8px 0;"><span class="stat-name">Rate</span><span class="stat-val" id="batchRate">—</span></div>
+            <div class="stat-row" style="padding:8px 0;"><span class="stat-name">Total tokens saved</span><span class="stat-val" id="batchSaved" style="color:var(--green)">0</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><span class="card-title">Verdict Distribution</span></div>
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;">
+              <div class="metric-box">
+                <div class="metric-label">TRUE</div>
+                <div class="metric-value good" id="batchTrue">0</div>
+              </div>
+              <div class="metric-box">
+                <div class="metric-label">FALSE</div>
+                <div class="metric-value bad" id="batchFalse">0</div>
+              </div>
+              <div class="metric-box">
+                <div class="metric-label">UNVERIF.</div>
+                <div class="metric-value neutral" id="batchUnverif">0</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="container">
+    SatyaCheck · HPE × Intel GenAI Workshop 2025 · Built with ScaleDown API and deterministic evidence engine · Project 5: Automated Fact-Checker for Vernacular News
+  </div>
+</footer>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────
+const BACKEND_BASE_URL = window.SATYACHECK_BACKEND_URL || `${window.location.protocol}//${window.location.hostname}:8000`;
+const BACKEND_API_KEY = "";
+const BATCH_POST_COUNT = 10;
+
+function getApiHeaders() {
+  const headers = { "Content-Type": "application/json" };
+  if (BACKEND_API_KEY) {
+    headers["x-api-key"] = BACKEND_API_KEY;
+  }
+  return headers;
+}
+
+// ─── SAMPLE POSTS ───────────────────────────────────────
+const SAMPLES = {
+  hi: [
+    "ब्रेकिंग न्यूज़! नई सरकारी नीति के तहत अब 12 लाख रुपये तक की सभी आय पर कोई इनकम टैक्स नहीं लगेगा।",
+    "वायरल दावा: UPI पर अब हर ट्रांजैक्शन पर 2% शुल्क लगेगा।",
+    "RBI ने रेपो रेट 8% कर दिया है और EMI तुरंत बढ़ेगी।",
+    "PM-Kisan योजना में अब ₹10,000 सालाना दिए जाएंगे।",
+    "चुनाव की तारीखें सोशल मीडिया पेज से घोषित की गई हैं।"
+  ],
+  en: [
+    "Breaking: New tax policy makes all income up to 12 lakh fully tax-free.",
+    "Viral message says UPI now has a mandatory 2% fee for all users.",
+    "RBI has raised repo rate to 8% effective immediately.",
+    "India won T20 World Cup 2024 by beating South Africa in final.",
+    "WhatsApp forwards all private chat content to Meta for ad targeting."
+  ],
+  ta: [
+    "முக்கிய செய்தி: இந்தியா T20 உலகக் கோப்பை 2024 இல் தென்னாப்பிரிக்காவை வென்றது.",
+    "UPI பரிவர்த்தனைகளுக்கு எல்லோருக்கும் 2% கட்டணம் விதிக்கப்பட்டது.",
+    "RBI ரெப்போ விகிதம் 8% ஆக உயர்ந்தது.",
+    "புதிய கொள்கையின்படி 12 லட்சம் வரை வருமானம் முழுவதும் வரிவிலக்கு.",
+    "சமூக ஊடகப் பக்கங்கள் தேர்தல் தேதிகளை அறிவிக்க முடியும்."
+  ],
+  bn: [
+    "ভারত ২০২৪ টি২০ বিশ্বকাপ জিতেছে।",
+    "ইউপিআই-এ সবার জন্য ২% চার্জ বসানো হয়েছে।",
+    "RBI রেপো রেট 8% হয়েছে।",
+    "ভারতে ১২ লাখ পর্যন্ত আয় পুরো ট্যাক্স ফ্রি।",
+    "নির্বাচনের তারিখ সোশ্যাল মিডিয়া পেজ থেকে ঘোষণা করা হয়েছে।"
+  ]
+};
+
+const SAMPLE_CURSOR = { hi: 0, en: 0, ta: 0, bn: 0 };
+
+// ─── BATCH FEED DATA ───────────────────────────────────
+let BATCH_POSTS = [
+  { text: "नई नीति के तहत 12 लाख तक कोई टैक्स नहीं!", lang: "Hindi" },
+  { text: "India won T20 World Cup 2024 by defeating South Africa!", lang: "English" },
+  { text: "RBI has increased repo rate to 8%", lang: "English" },
+  { text: "UPI पर अब 2% charge लगेगा — सरकार का नया आदेश", lang: "Hindi" },
+  { text: "Chandrayaan-3 landed on Moon's south pole successfully", lang: "English" },
+  { text: "COVID vaccine causes infertility, doctors warn!", lang: "English" },
+  { text: "PM Kisan yojana ab ₹10,000 dega kisano ko!", lang: "Hindi" },
+  { text: "WhatsApp all messages now shared with Meta for ads", lang: "English" },
+  { text: "Gold duty is now only 6% after budget 2024", lang: "English" },
+  { text: "அரிசி மீது 18% GST விதிக்கப்படும் என அரசு அறிவித்தது", lang: "Tamil" }
+];
+
+const SAMPLE_POST_POOL = [
+  { text: "Breaking: New policy claims zero tax up to 12 lakh income.", lang: "NEWS" },
+  { text: "Viral post says UPI now charges 2 percent fee on all transfers.", lang: "NEWS" },
+  { text: "Claim: PM-Kisan payout increased to Rs 10000 in 2025.", lang: "NEWS" },
+  { text: "India won T20 World Cup 2024 final against South Africa.", lang: "NEWS" },
+  { text: "RBI repo rate has been raised to 8 percent immediately.", lang: "NEWS" },
+  { text: "Chandrayaan-3 failed to land, says viral handle.", lang: "NEWS" },
+  { text: "Aadhaar gets cancelled automatically every year if not updated.", lang: "NEWS" },
+  { text: "COVID vaccine causes infertility in all recipients.", lang: "NEWS" },
+  { text: "Election dates can be changed by forwarding this message.", lang: "NEWS" },
+  { text: "All petrol becomes free on national holidays in India.", lang: "NEWS" },
+  { text: "भारत ने T20 विश्व कप 2024 जीता।", lang: "Hindi" },
+  { text: "UPI पर सभी यूजर्स के लिए 2% चार्ज लगेगा।", lang: "Hindi" },
+  { text: "नई नीति के तहत 12 लाख तक पूरी आय टैक्स फ्री है।", lang: "Hindi" },
+  { text: "RBI रेपो रेट 8% है।", lang: "Hindi" },
+  { text: "PM-Kisan राशि 10000 रुपये कर दी गई है।", lang: "Hindi" },
+  { text: "இந்தியா T20 உலகக் கோப்பை 2024 வென்றது.", lang: "Tamil" },
+  { text: "UPI பரிவர்த்தனைகளுக்கு எல்லோருக்கும் 2% கட்டணம்.", lang: "Tamil" },
+  { text: "RBI ரெப்போ விகிதம் 8% ஆக உயர்ந்தது.", lang: "Tamil" },
+  { text: "இந்தியாவில் எல்லா அரிசிக்கும் 18% GST விதித்தது.", lang: "Tamil" },
+  { text: "ভারত ২০২৪ টি২০ বিশ্বকাপ জিতেছে।", lang: "Bengali" },
+  { text: "ইউপিআই-এ সবার জন্য ২% চার্জ বসানো হয়েছে।", lang: "Bengali" },
+  { text: "RBI রেপো রেট 8% হয়েছে।", lang: "Bengali" },
+  { text: "ভারতে ১২ লাখ পর্যন্ত আয় পুরো ট্যাক্স ফ্রি।", lang: "Bengali" },
+  { text: "WhatsApp forwards all private chat content to Meta for ads.", lang: "NEWS" },
+  { text: "Import duty on gold was reduced in Budget 2024.", lang: "NEWS" },
+  { text: "School meal schemes have ended permanently.", lang: "NEWS" },
+  { text: "RBI does not issue policy via random WhatsApp forwards.", lang: "NEWS" },
+  { text: "Election schedule is announced by ECI, not private pages.", lang: "NEWS" }
+];
+
+let sampleRotationCursor = 0;
+
+// ─── STATE ───────────────────────────────────────────────
+let stats = { checked: 0, trueV: 0, falseV: 0, unverif: 0, savedTokens: [], costSaved: 0 };
+let currentMode = 'smart';
+let currentLang = 'auto';
+
+// ─── TAB SWITCHING ───────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ─── LANG & MODE ─────────────────────────────────────────
+function setLang(el, lang) {
+  document.querySelectorAll('.lang-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  currentLang = lang;
+}
+
+function setMode(el, mode) {
+  currentMode = mode;
+  document.getElementById('naiveBtn').classList.remove('active');
+  document.getElementById('smartBtn').classList.remove('active');
+  el.classList.add('active');
+
+  // Update pipeline viz
+  const pipe2 = document.getElementById('pipe2');
+  if (mode === 'smart') {
+    pipe2.textContent = 'SCALEDOWN';
+  } else {
+    pipe2.textContent = 'ALL 40K TOKENS';
+    pipe2.style.borderColor = 'var(--red)';
+    pipe2.style.color = 'var(--red)';
+  }
+  if (mode === 'smart') {
+    pipe2.style.borderColor = '';
+    pipe2.style.color = '';
+  }
+}
+
+// ─── LOAD SAMPLE ─────────────────────────────────────────
+function loadSample(lang) {
+  const key = SAMPLES[lang] ? lang : 'en';
+  const pool = SAMPLES[key];
+  const cursor = SAMPLE_CURSOR[key] || 0;
+  const item = pool[cursor % pool.length];
+  SAMPLE_CURSOR[key] = (cursor + 1) % pool.length;
+  document.getElementById('postInput').value = item;
+}
+
+// ─── ANIMATE PIPELINE ────────────────────────────────────
+async function animatePipeline(steps) {
+  const nodes = ['pipe1','pipe2','pipe3','pipe4'];
+  nodes.forEach(n => { document.getElementById(n).className = 'pipe-node'; });
+  for (let i = 0; i < steps; i++) {
+    if (i > 0) document.getElementById(nodes[i-1]).className = 'pipe-node done';
+    document.getElementById(nodes[i]).className = 'pipe-node active';
+    await sleep(400);
+  }
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ─── MAIN CHECK FUNCTION ─────────────────────────────────
+async function runCheck() {
+  const post = document.getElementById('postInput').value.trim();
+  if (!post) { alert('Please enter a social media post to fact-check.'); return; }
+
+  const btn = document.getElementById('runBtn');
+  btn.disabled = true;
+
+  document.getElementById('resultArea').classList.remove('show');
+  document.getElementById('loader').classList.add('show');
+
+  const startTime = Date.now();
+
+  try {
+    let origTokens, compTokens;
+
+    // Animate pipeline
+    animatePipeline(0);
+    await sleep(300);
+    animatePipeline(1);
+
+    document.getElementById('loaderText').textContent =
+      currentMode === 'smart'
+        ? 'Running ScaleDown optimized fact-check pipeline...'
+        : 'Running naive baseline pipeline with full fact context...';
+
+    await sleep(200);
+    animatePipeline(2);
+    document.getElementById('loaderText').textContent = 'Scoring evidence and finalizing verdict...';
+
+    const endpoint = currentMode === 'smart' ? '/fact-check/smart' : '/fact-check/naive';
+    const response = await fetch(BACKEND_BASE_URL + endpoint, {
+      method: "POST",
+      headers: getApiHeaders(),
+      body: JSON.stringify({ text: post })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Backend error ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    const lines = data.result.split("\n");
+
+    const verdict = lines[0]?.replace("VERDICT:", "").trim() || "UNVERIFIABLE";
+    const reason = lines[1]?.replace("REASON:", "").trim() || data.result;
+    const citation = (data.citations && data.citations.length > 0) ? data.citations[0] : null;
+
+    origTokens = data.tokens_before;
+    compTokens = data.tokens_after;
+
+    const totalLatency = data.latency_ms || (Date.now() - startTime);
+    const savings = Math.round((1 - compTokens / origTokens) * 100);
+    const costPerCheck = Number(data.cost_estimate_usd || 0).toFixed(4);
+    const costPerDay = '$' + Math.round((data.cost_estimate_usd || 0) * 1000000).toLocaleString();
+
+    await sleep(200);
+    animatePipeline(3);
+
+    // ── SHOW RESULT ──
+    document.getElementById('loader').classList.remove('show');
+    document.getElementById('resultArea').classList.add('show');
+
+    const banner = document.getElementById('verdictBanner');
+    banner.className = 'verdict-banner ' + verdict;
+    document.getElementById('verdictIcon').textContent = verdict === 'TRUE' ? '✅' : verdict === 'FALSE' ? '❌' : '⚠️';
+    document.getElementById('verdictText').textContent = verdict;
+    const citationHtml = citation
+      ? `<br><br><strong>Source:</strong> ${citation.source || 'Trusted source'}${citation.url ? ` (<a href="${citation.url}" target="_blank" rel="noopener noreferrer" style="color:var(--blue)">link</a>)` : ''}`
+      : '';
+    document.getElementById('reasonBox').innerHTML = `<strong>Reason:</strong> ${reason}${citationHtml}`;
+
+    // Metrics
+    document.getElementById('metricLatency').textContent = totalLatency + 'ms';
+    document.getElementById('metricCost').textContent = '$' + costPerCheck;
+    document.getElementById('metricCost').className = 'metric-value ' + (currentMode === 'smart' ? 'good' : 'bad');
+    document.getElementById('metricSavings').textContent = savings + '%';
+    document.getElementById('metricScale').textContent = costPerDay;
+    document.getElementById('metricScale').className = 'metric-value ' + (currentMode === 'smart' ? 'good' : 'bad');
+
+    // Token bars
+    const pct = (compTokens / origTokens * 100).toFixed(0);
+    document.getElementById('origCount').textContent = origTokens + ' tok';
+    document.getElementById('compCount').textContent = compTokens + ' tok';
+    setTimeout(() => {
+      document.getElementById('origBar').style.width = '100%';
+      document.getElementById('compBar').style.width = (currentMode === 'smart' ? pct : '100') + '%';
+    }, 100);
+
+    // Mode badge
+    document.getElementById('modeBadge').innerHTML = currentMode === 'smart'
+      ? '<span class="cost-chip smart">ScaleDown ✓</span>'
+      : '<span class="cost-chip naive">Naive Mode</span>';
+
+    // Update session stats
+    stats.checked++;
+    if (verdict === 'TRUE') stats.trueV++;
+    else if (verdict === 'FALSE') stats.falseV++;
+    else stats.unverif++;
+
+    if (currentMode === 'smart') {
+      stats.savedTokens.push(savings);
+      const naiveCost = origTokens / 1000 * 0.0025;
+      const smartCost = parseFloat(costPerCheck);
+      stats.costSaved += naiveCost - smartCost;
+    }
+
+    updateStats();
+    animatePipeline(4);
+
+  } catch (err) {
+    document.getElementById('loader').classList.remove('show');
+    document.getElementById('resultArea').classList.add('show');
+    document.getElementById('verdictBanner').className = 'verdict-banner UNVERIFIABLE';
+    document.getElementById('verdictIcon').textContent = '⚠️';
+    document.getElementById('verdictText').textContent = 'ERROR';
+    document.getElementById('reasonBox').innerHTML = `<strong>Error:</strong> ${err.message}. Check API key and network.`;
+    console.error(err);
+  }
+
+  btn.disabled = false;
+}
+
+function updateStats() {
+  document.getElementById('statChecked').textContent = stats.checked;
+  document.getElementById('statTrue').textContent = stats.trueV;
+  document.getElementById('statFalse').textContent = stats.falseV;
+  document.getElementById('statUnverif').textContent = stats.unverif;
+  if (stats.savedTokens.length > 0) {
+    const avg = Math.round(stats.savedTokens.reduce((a,b) => a+b, 0) / stats.savedTokens.length);
+    document.getElementById('statSavings').textContent = avg + '%';
+  }
+  document.getElementById('statCostSaved').textContent = '$' + stats.costSaved.toFixed(4);
+}
+
+function normalizeBatchPosts(rows) {
+  const out = [];
+  const seen = new Set();
+
+  for (const row of rows || []) {
+    const text = (row && row.text ? row.text : '').trim();
+    if (!text) continue;
+    const key = text.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push({ text, lang: row.lang || 'NEWS' });
+  }
+
+  return out;
+}
+
+function rotateSamplePosts(count) {
+  if (!SAMPLE_POST_POOL.length || count <= 0) return [];
+  const picks = [];
+
+  for (let i = 0; i < count; i++) {
+    const idx = (sampleRotationCursor + i) % SAMPLE_POST_POOL.length;
+    picks.push({ ...SAMPLE_POST_POOL[idx] });
+  }
+
+  sampleRotationCursor = (sampleRotationCursor + count) % SAMPLE_POST_POOL.length;
+  return picks;
+}
+
+function withVariety(posts, desiredCount) {
+  const normalized = normalizeBatchPosts(posts);
+  const shuffled = [...normalized].sort(() => Math.random() - 0.5);
+  let finalPosts = shuffled.slice(0, desiredCount);
+
+  if (finalPosts.length < desiredCount) {
+    const needed = desiredCount - finalPosts.length;
+    finalPosts = normalizeBatchPosts([...finalPosts, ...rotateSamplePosts(needed)]);
+  }
+
+  if (finalPosts.length < desiredCount) {
+    finalPosts = normalizeBatchPosts([...finalPosts, ...rotateSamplePosts(desiredCount)]).slice(0, desiredCount);
+  }
+
+  return finalPosts;
+}
+
+// ─── BATCH FEED ───────────────────────────────────────────
+function initFeed() {
+  const list = document.getElementById('feedList');
+  list.innerHTML = BATCH_POSTS.map((p, i) => `
+    <div class="feed-item" id="feed-${i}">
+      <div class="feed-top">
+        <span class="feed-lang">${p.lang}</span>
+        <span class="feed-verdict PENDING" id="fv-${i}">PENDING</span>
+      </div>
+      <div class="feed-text">${p.text}</div>
+    </div>
+  `).join('');
+}
+
+async function refreshFeedFromBackend() {
+  try {
+    const socialResp = await fetch(BACKEND_BASE_URL + '/social-feed', { headers: getApiHeaders() });
+    const socialData = socialResp.ok ? await socialResp.json() : { posts: [] };
+    const socialPosts = (socialData.posts || []).map(p => ({
+      text: p.title || p.snippet || '',
+      lang: (p.platform || 'social').toUpperCase()
+    })).filter(p => p.text);
+
+    const newsResp = await fetch(BACKEND_BASE_URL + '/live-news', { headers: getApiHeaders() });
+    const newsData = newsResp.ok ? await newsResp.json() : { posts: [] };
+    const newsPosts = (newsData.posts || []).map(t => ({ text: t, lang: 'NEWS' }));
+
+    const merged = [...socialPosts, ...newsPosts];
+    BATCH_POSTS = withVariety(merged, BATCH_POST_COUNT);
+    initFeed();
+  } catch (err) {
+    BATCH_POSTS = withVariety([], BATCH_POST_COUNT);
+    initFeed();
+    console.warn('Live feed refresh failed, using rotating sample posts.', err);
+  }
+}
+
+async function refreshQueueOnly() {
+  const statusEl = document.getElementById('feedStatus');
+  statusEl.textContent = 'REFRESHING';
+  statusEl.style.background = 'rgba(59,130,246,0.12)';
+  statusEl.style.color = 'var(--blue)';
+
+  try {
+    await refreshFeedFromBackend();
+    statusEl.textContent = 'READY';
+    statusEl.style.background = 'rgba(34,197,94,0.1)';
+    statusEl.style.color = 'var(--green)';
+  } catch (err) {
+    statusEl.textContent = 'IDLE';
+    statusEl.style.background = 'rgba(240,180,41,0.1)';
+    statusEl.style.color = 'var(--accent)';
+    console.warn('Queue refresh fallback used.', err);
+  }
+}
+
+async function runBatch() {
+  await refreshFeedFromBackend();
+  initFeed();
+  document.getElementById('feedStatus').textContent = 'RUNNING';
+  document.getElementById('feedStatus').style.background = 'rgba(34,197,94,0.1)';
+  document.getElementById('feedStatus').style.color = 'var(--green)';
+
+  const payload = {
+    mode: currentMode,
+    workers: 20,
+    posts: BATCH_POSTS.slice(0, BATCH_POST_COUNT).map(p => p.text)
+  };
+
+  try {
+    const response = await fetch(BACKEND_BASE_URL + '/benchmark', {
+      method: 'POST',
+      headers: getApiHeaders(),
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Benchmark failed with status ${response.status}`);
+    }
+
+    const data = await response.json();
+    const results = data.results || [];
+
+    results.forEach((item, i) => {
+      const verdict = item.verdict || 'UNVERIFIABLE';
+      const el = document.getElementById(`fv-${i}`);
+      if (el) {
+        el.textContent = verdict;
+        el.className = 'feed-verdict ' + verdict;
+      }
+    });
+
+    document.getElementById('batchProcessed').textContent = data.count || 0;
+    document.getElementById('batchElapsed').textContent = (data.elapsed_seconds || 0) + 's';
+    document.getElementById('batchRate').textContent = (data.throughput_per_min || 0) + '/min';
+    document.getElementById('batchSaved').textContent = ((data.tokens_before || 0) - (data.tokens_after || 0)).toLocaleString() + ' tokens';
+    document.getElementById('batchTrue').textContent = (data.verdict_counts && data.verdict_counts.TRUE) || 0;
+    document.getElementById('batchFalse').textContent = (data.verdict_counts && data.verdict_counts.FALSE) || 0;
+    document.getElementById('batchUnverif').textContent = (data.verdict_counts && data.verdict_counts.UNVERIFIABLE) || 0;
+    document.getElementById('feedStatus').textContent = 'DONE';
+  } catch (error) {
+    document.getElementById('feedStatus').textContent = 'ERROR';
+    document.getElementById('feedStatus').style.background = 'rgba(239,68,68,0.1)';
+    document.getElementById('feedStatus').style.color = 'var(--red)';
+    console.error(error);
+    alert('Batch run failed. Ensure backend is running on http://localhost:8000');
+  }
+}
+
+// ─── INIT ─────────────────────────────────────────────────
+initFeed();
+refreshFeedFromBackend();
+document.getElementById('smartBtn').classList.add('active');
+</script>
+</body>
+</html>

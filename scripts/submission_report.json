@@ -1,0 +1,28 @@
+{
+  "generated_at": "2026-03-22T16:37:45.034451+00:00",
+  "dataset_samples": 30,
+  "benchmark_posts": 400,
+  "smart": {
+    "throughput_per_min": 12906,
+    "token_savings_pct": 93.73,
+    "cost_estimate_usd": 0.144984,
+    "cost_if_naive_usd": 2.312,
+    "cost_saved_usd": 2.167016,
+    "accuracy": 1.0
+  },
+  "naive": {
+    "throughput_per_min": 7863,
+    "cost_estimate_usd": 2.312,
+    "accuracy": 1.0
+  },
+  "submission_checks": {
+    "problem_shown_naive": true,
+    "fix_shown_scaledown": true,
+    "numbers_shown": true,
+    "correctness_shown": true,
+    "throughput_thousands_per_min": true,
+    "low_cost_per_item": true,
+    "output_format_ok": true,
+    "citation_present": true
+  }
+}

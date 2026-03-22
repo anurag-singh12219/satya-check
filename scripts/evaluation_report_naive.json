@@ -1,0 +1,358 @@
+{
+  "mode": "naive",
+  "samples": 30,
+  "accuracy": 1.0,
+  "macro_f1": 0.6667,
+  "avg_latency_ms": 7.07,
+  "avg_confidence": 0.928,
+  "label_support": {
+    "TRUE": 12,
+    "FALSE": 18
+  },
+  "prediction_distribution": {
+    "TRUE": 12,
+    "FALSE": 18
+  },
+  "by_language_accuracy": {
+    "en": 1.0,
+    "hi": 1.0,
+    "ta": 1.0,
+    "bn": 1.0
+  },
+  "per_label_metrics": {
+    "TRUE": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "tp": 12,
+      "fp": 0,
+      "fn": 0
+    },
+    "FALSE": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "tp": 18,
+      "fp": 0,
+      "fn": 0
+    },
+    "UNVERIFIABLE": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 0
+    }
+  },
+  "confusion_matrix": {
+    "TRUE": {
+      "TRUE": 12
+    },
+    "FALSE": {
+      "FALSE": 18
+    }
+  },
+  "results": [
+    {
+      "text": "Under new regime, income up to 7 lakh can become tax free due to rebate.",
+      "language": "en",
+      "expected": "TRUE",
+      "predicted": "TRUE",
+      "correct": true,
+      "confidence": 0.98,
+      "latency_ms": 10,
+      "reason": "VERDICT: TRUE\nREASON: Matched verified fact 'Under the new tax regime, total income up to INR 7 lakh can become tax-free because of rebate under Section 87A.' from Income Tax Department (2025-02-01)."
+    },
+    {
+      "text": "All income under 12 lakh is fully tax exempt in India.",
+      "language": "en",
+      "expected": "FALSE",
+      "predicted": "FALSE",
+      "correct": true,
+      "confidence": 0.98,
+      "latency_ms": 14,
+      "reason": "VERDICT: FALSE\nREASON: Matched verified fact 'All income up to INR 12 lakh is fully exempt from income tax in India.' from Income Tax Department (2025-02-01)."
+    },
+    {
+      "text": "The old tax regime has been removed completely.",
+      "language": "en",
+      "expected": "FALSE",
+      "predicted": "FALSE",
+      "correct": true,
+      "confidence": 0.98,
+      "latency_ms": 4,
+      "reason": "VERDICT: FALSE\nREASON: Matched verified fact 'The old tax regime has been removed completely.' from Ministry of Finance (2024-07-23)."
+    },
+    {
+      "text": "UPI payments are free for person-to-person users.",
+      "language": "en",
+      "expected": "TRUE",
+      "predicted": "TRUE",
+      "correct": true,
+      "confidence": 0.98,
+      "latency_ms": 9,
+      "reason": "VERDICT: TRUE\nREASON: Matched verified fact 'UPI payments are free for person-to-person users.' from NPCI (2024-09-01)."
+    },
+    {
+      "text": "Government imposed 2 percent charge on every UPI transfer for all users.",
+      "language": "en",
+      "expected": "FALSE",
+      "predicted": "FALSE",
+      "correct": true,
+      "confidence": 0.98,
+      "latency_ms": 8,
+      "reason": "VERDICT: FALSE\nREASON: Matched verified fact 'Government has imposed a 2 percent charge on every UPI transaction for all users.' from PIB Fact Check (2024-08-14)."
+    },
+    {
+      "text": "RBI repo rate is 6.25 percent in early 2025.",
+      "language": "en",
+      "expected": "TRUE",
+      "predicted": "TRUE",
+      "correct": true,
+      "confidence": 0.98,
+      "latency_ms": 6,
+      "reason": "VERDICT: TRUE\nREASON: Matched verified fact 'RBI repo rate is 6.25 percent in early 2025.' from RBI Monetary Policy (2025-02-07)."
+    },
+    {
+      "text": "RBI repo rate is 8 percent now.",
+      "language": "en",
+      "expected": "FALSE",
+      "predicted": "FALSE",
+      "correct": true,
+      "confidence": 0.98,
+      "latency_ms": 9,
+      "reason": "VERDICT: FALSE\nREASON: Matched verified fact 'RBI has raised the repo rate to 8 percent.' from RBI Monetary Policy (2025-02-07)."
+    },
+    {
+      "text": "India won the ICC Men's T20 World Cup 2024 final against South Africa.",
+      "language": "en",
+      "expected": "TRUE",
+      "predicted": "TRUE",
+      "correct": true,
+      "confidence": 0.98,
+      "latency_ms": 4,
+      "reason": "VERDICT: TRUE\nREASON: Matched verified fact 'India won the ICC Men T20 World Cup 2024 by defeating South Africa in the final.' from ICC (2024-06-29)."
+    },
+    {
+      "text": "India lost the T20 World Cup 2024 final.",
+      "language": "en",
+      "expected": "FALSE",
+      "predicted": "FALSE",
+      "correct": true,
+      "confidence": 0.98,
+      "latency_ms": 3,
+      "reason": "VERDICT: FALSE\nREASON: Matched verified fact 'India lost the T20 World Cup 2024 final.' from ICC (2024-06-29)."
+    },
+    {
+      "text": "Chandrayaan-3 landed near the moon south pole on 23 August 2023.",
+      "language": "en",
+      "expected": "TRUE",
+      "predicted": "TRUE",
+      "correct": true,
+      "confidence": 0.98,
+      "latency_ms": 5,
+      "reason": "VERDICT: TRUE\nREASON: Matched verified fact 'Chandrayaan-3 landed near the Moon south pole on 23 August 2023.' from ISRO (2023-08-23)."
+    },
+    {
+      "text": "Chandrayaan-3 failed to land on the moon.",
+      "language": "en",
+      "expected": "FALSE",
+      "predicted": "FALSE",
+      "correct": true,
+      "confidence": 0.98,
+      "latency_ms": 4,
+      "reason": "VERDICT: FALSE\nREASON: Matched verified fact 'Chandrayaan-3 failed to land on the Moon.' from ISRO (2023-08-24)."
+    },
+    {
+      "text": "COVID vaccines approved in India are considered safe by public health authorities.",
+      "language": "en",
+      "expected": "TRUE",
+      "predicted": "TRUE",
+      "correct": true,
+      "confidence": 0.98,
+      "latency_ms": 4,
+      "reason": "VERDICT: TRUE\nREASON: Matched verified fact 'Approved COVID-19 vaccines in India are considered safe and effective by national and global health authorities.' from ICMR and WHO (2024-04-15)."
+    },
+    {
+      "text": "COVID vaccine causes infertility in all recipients.",
+      "language": "en",
+      "expected": "FALSE",
+      "predicted": "FALSE",
+      "correct": true,
+      "confidence": 0.98,
+      "latency_ms": 23,
+      "reason": "VERDICT: FALSE\nREASON: Matched verified fact 'COVID vaccine causes infertility in all recipients.' from PIB Fact Check (2024-03-01)."
+    },
+    {
+      "text": "Government imposed 18 percent GST on all rice sold in India.",
+      "language": "en",
+      "expected": "FALSE",
+      "predicted": "FALSE",
+      "correct": true,
+      "confidence": 0.98,
+      "latency_ms": 11,
+      "reason": "VERDICT: FALSE\nREASON: Matched verified fact 'Government has imposed 18 percent GST on all rice sold in India.' from PIB Fact Check (2024-10-10)."
+    },
+    {
+      "text": "PM-Kisan provides 6000 rupees per year to eligible farmer families.",
+      "language": "en",
+      "expected": "TRUE",
+      "predicted": "TRUE",
+      "correct": true,
+      "confidence": 0.98,
+      "latency_ms": 48,
+      "reason": "VERDICT: TRUE\nREASON: Matched verified fact 'PM-Kisan provides INR 6000 per year to eligible farmer families in three installments.' from PM-KISAN Portal (2024-11-01)."
+    },
+    {
+      "text": "PM-Kisan has been increased to 10000 rupees per year for all beneficiaries.",
+      "language": "en",
+      "expected": "FALSE",
+      "predicted": "FALSE",
+      "correct": true,
+      "confidence": 0.98,
+      "latency_ms": 6,
+      "reason": "VERDICT: FALSE\nREASON: Matched verified fact 'PM-Kisan amount has been increased to INR 10000 per year for all beneficiaries.' from PIB Fact Check (2024-12-11)."
+    },
+    {
+      "text": "Gold import duty was reduced in Union Budget 2024.",
+      "language": "en",
+      "expected": "TRUE",
+      "predicted": "TRUE",
+      "correct": true,
+      "confidence": 0.98,
+      "latency_ms": 4,
+      "reason": "VERDICT: TRUE\nREASON: Matched verified fact 'Import duty on gold was reduced in Union Budget 2024.' from Union Budget Documents (2024-07-23)."
+    },
+    {
+      "text": "WhatsApp cannot read private messages because chats are end-to-end encrypted.",
+      "language": "en",
+      "expected": "TRUE",
+      "predicted": "TRUE",
+      "correct": true,
+      "confidence": 0.6,
+      "latency_ms": 9,
+      "reason": "VERDICT: TRUE\nREASON: Matched verified fact 'WhatsApp messages are protected by end-to-end encryption in normal chats.' from WhatsApp Official Documentation (2024-06-01)."
+    },
+    {
+      "text": "WhatsApp shares all private chat content with Meta for ad targeting.",
+      "language": "en",
+      "expected": "FALSE",
+      "predicted": "FALSE",
+      "correct": true,
+      "confidence": 0.98,
+      "latency_ms": 5,
+      "reason": "VERDICT: FALSE\nREASON: Matched verified fact 'WhatsApp forwards all message content to Meta for ad targeting.' from WhatsApp Official Documentation (2024-06-01)."
+    },
+    {
+      "text": "भारत ने T20 विश्व कप 2024 जीता।",
+      "language": "hi",
+      "expected": "TRUE",
+      "predicted": "TRUE",
+      "correct": true,
+      "confidence": 0.98,
+      "latency_ms": 6,
+      "reason": "VERDICT: TRUE\nREASON: Matched verified fact 'India won the ICC Men T20 World Cup 2024 by defeating South Africa in the final.' from ICC (2024-06-29)."
+    },
+    {
+      "text": "UPI पर सभी यूजर्स के लिए 2% चार्ज लगता है।",
+      "language": "hi",
+      "expected": "FALSE",
+      "predicted": "FALSE",
+      "correct": true,
+      "confidence": 0.514,
+      "latency_ms": 2,
+      "reason": "VERDICT: FALSE\nREASON: Matched verified fact 'Government has imposed a 2 percent charge on every UPI transaction for all users.' from PIB Fact Check (2024-08-14)."
+    },
+    {
+      "text": "नई नीति में 12 लाख तक पूरी आय टैक्स फ्री है।",
+      "language": "hi",
+      "expected": "FALSE",
+      "predicted": "FALSE",
+      "correct": true,
+      "confidence": 0.9,
+      "latency_ms": 3,
+      "reason": "VERDICT: FALSE\nREASON: Matched verified fact 'All income up to INR 12 lakh is fully exempt from income tax in India.' from Income Tax Department (2025-02-01)."
+    },
+    {
+      "text": "RBI रेपो रेट 8% है।",
+      "language": "hi",
+      "expected": "FALSE",
+      "predicted": "FALSE",
+      "correct": true,
+      "confidence": 0.9,
+      "latency_ms": 2,
+      "reason": "VERDICT: FALSE\nREASON: Matched verified fact 'RBI has raised the repo rate to 8 percent.' from RBI Monetary Policy (2025-02-07)."
+    },
+    {
+      "text": "இந்தியா T20 உலகக் கோப்பை 2024 வென்றது.",
+      "language": "ta",
+      "expected": "TRUE",
+      "predicted": "TRUE",
+      "correct": true,
+      "confidence": 0.98,
+      "latency_ms": 2,
+      "reason": "VERDICT: TRUE\nREASON: Matched verified fact 'India won the ICC Men T20 World Cup 2024 by defeating South Africa in the final.' from ICC (2024-06-29)."
+    },
+    {
+      "text": "UPI பரிவர்த்தனைகளுக்கு எல்லோருக்கும் 2% கட்டணம் விதிக்கப்பட்டது.",
+      "language": "ta",
+      "expected": "FALSE",
+      "predicted": "FALSE",
+      "correct": true,
+      "confidence": 0.6,
+      "latency_ms": 2,
+      "reason": "VERDICT: FALSE\nREASON: Matched verified fact 'Government has imposed a 2 percent charge on every UPI transaction for all users.' from PIB Fact Check (2024-08-14)."
+    },
+    {
+      "text": "RBI ரெப்போ விகிதம் 8% ஆக உயர்ந்தது.",
+      "language": "ta",
+      "expected": "FALSE",
+      "predicted": "FALSE",
+      "correct": true,
+      "confidence": 0.9,
+      "latency_ms": 1,
+      "reason": "VERDICT: FALSE\nREASON: Matched verified fact 'RBI has raised the repo rate to 8 percent.' from RBI Monetary Policy (2025-02-07)."
+    },
+    {
+      "text": "ভারত ২০২৪ টি২০ বিশ্বকাপ জিতেছে।",
+      "language": "bn",
+      "expected": "TRUE",
+      "predicted": "TRUE",
+      "correct": true,
+      "confidence": 0.98,
+      "latency_ms": 1,
+      "reason": "VERDICT: TRUE\nREASON: Matched verified fact 'India won the ICC Men T20 World Cup 2024 by defeating South Africa in the final.' from ICC (2024-06-29)."
+    },
+    {
+      "text": "ইউপিআই-এ সবার জন্য ২% চার্জ বসানো হয়েছে।",
+      "language": "bn",
+      "expected": "FALSE",
+      "predicted": "FALSE",
+      "correct": true,
+      "confidence": 0.9,
+      "latency_ms": 1,
+      "reason": "VERDICT: FALSE\nREASON: Matched verified fact 'Government has imposed a 2 percent charge on every UPI transaction for all users.' from PIB Fact Check (2024-08-14)."
+    },
+    {
+      "text": "RBI রেপো রেট 8% হয়েছে।",
+      "language": "bn",
+      "expected": "FALSE",
+      "predicted": "FALSE",
+      "correct": true,
+      "confidence": 0.98,
+      "latency_ms": 1,
+      "reason": "VERDICT: FALSE\nREASON: Matched verified fact 'RBI has raised the repo rate to 8 percent.' from RBI Monetary Policy (2025-02-07)."
+    },
+    {
+      "text": "Aadhaar is automatically cancelled if not updated every year.",
+      "language": "en",
+      "expected": "FALSE",
+      "predicted": "FALSE",
+      "correct": true,
+      "confidence": 0.98,
+      "latency_ms": 5,
+      "reason": "VERDICT: FALSE\nREASON: Matched verified fact 'Aadhaar gets automatically cancelled if not updated every year.' from UIDAI (2024-09-20)."
+    }
+  ]
+}
